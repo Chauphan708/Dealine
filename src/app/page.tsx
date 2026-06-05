@@ -24,6 +24,8 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useToast } from '@/components/common/Toast';
+import { disconnectDrive } from '@/lib/google/driveService';
 
 export default function Home() {
   const { t, language } = useI18n();
@@ -42,7 +44,25 @@ export default function Home() {
     stats,
   } = useDeadlines();
 
-  const { settings } = useSettings();
+  const { toast } = useToast();
+  const { settings, updateSettings } = useSettings();
+
+  const handleDisconnectDrive = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      disconnectDrive();
+      await updateSettings({
+        googleDriveConnected: false,
+        googleDriveFolderId: '',
+      });
+      localStorage.removeItem('dg_drive_last_sync');
+      localStorage.removeItem('dg_drive_file_count');
+      toast('Đã ngắt kết nối với Google Drive.', 'info');
+    } catch {
+      toast('Ngắt kết nối thất bại.', 'error');
+    }
+  };
 
   // Manual Add Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -208,18 +228,46 @@ export default function Home() {
                 <ArrowRight size={16} className="arrow-icon" />
               </Link>
 
-              <Link href="/settings" className="action-card glass-card hover-glow">
-                <div className="action-card-left">
-                  <div className="action-card-icon bg-primary">
-                    <Link2 size={18} />
+              {settings.googleDriveConnected ? (
+                <div className="action-card glass-card connected-card">
+                  <div className="action-card-left">
+                    <div className="action-card-icon bg-primary">
+                      <Link2 size={18} />
+                    </div>
+                    <div className="action-card-info">
+                      <h4 className="card-title">Đồng bộ Google Drive</h4>
+                      <p className="card-desc" style={{ color: 'var(--accent-success)', fontWeight: 500 }}>
+                        ● Đang kết nối tài khoản
+                      </p>
+                    </div>
                   </div>
-                  <div className="action-card-info">
-                    <h4 className="card-title">Đồng bộ Google Drive</h4>
-                    <p className="card-desc">Kết nối tự động theo dõi NotebookLM</p>
+                  <div className="card-action-buttons">
+                    <button
+                      className="btn-quick-disconnect"
+                      onClick={handleDisconnectDrive}
+                      id="btn-dashboard-disconnect"
+                    >
+                      Hủy liên kết
+                    </button>
+                    <Link href="/settings" className="btn-quick-config">
+                      Cấu hình
+                    </Link>
                   </div>
                 </div>
-                <ArrowRight size={16} className="arrow-icon" />
-              </Link>
+              ) : (
+                <Link href="/settings" className="action-card glass-card hover-glow">
+                  <div className="action-card-left">
+                    <div className="action-card-icon bg-primary">
+                      <Link2 size={18} />
+                    </div>
+                    <div className="action-card-info">
+                      <h4 className="card-title">Đồng bộ Google Drive</h4>
+                      <p className="card-desc">Kết nối tự động theo dõi NotebookLM</p>
+                    </div>
+                  </div>
+                  <ArrowRight size={16} className="arrow-icon" />
+                </Link>
+              )}
             </div>
           </div>
 

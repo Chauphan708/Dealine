@@ -65,13 +65,9 @@ export const DriveConnector: React.FC = () => {
         name: f.name,
       }));
       setFolders(folderItems);
-    } catch {
-      // Mock folders if actual API fails due to lacking real client credentials
-      setFolders([
-        { id: 'mock-folder-1', name: 'NotebookLM Synced Docs' },
-        { id: 'mock-folder-2', name: 'Tài liệu Văn bản Công ty' },
-        { id: 'mock-folder-3', name: 'Hợp đồng & Hóa đơn 2026' },
-      ]);
+    } catch (err: any) {
+      toast('Không thể tải danh sách thư mục. Vui lòng kiểm tra quyền xác thực Google.', 'error');
+      setFolders([]);
     } finally {
       setLoadingFolders(false);
     }
@@ -91,13 +87,9 @@ export const DriveConnector: React.FC = () => {
         await updateSettings({ googleDriveConnected: true });
         toast('Kết nối Google Drive thành công! 🔌', 'success');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      // Fallback popup simulation for demo wow factor
-      setTimeout(async () => {
-        await updateSettings({ googleDriveConnected: true });
-        toast('Đã mô phỏng kết nối Google Drive thành công (OAuth Demo)! 🔌', 'success');
-      }, 1000);
+      toast(err.message || 'Kết nối Google Drive thất bại. Vui lòng thiết lập Client ID.', 'error');
     } finally {
       setIsConnecting(false);
     }
@@ -150,30 +142,17 @@ export const DriveConnector: React.FC = () => {
       // Update sync records
       const time = new Date().toLocaleTimeString('vi-VN') + ' ' + new Date().toLocaleDateString('vi-VN');
       setLastSyncTime(time);
-      // Mock scanning random file counts for demo
-      const simulatedCount = count > 0 ? count : Math.floor(Math.random() * 5) + 3;
-      setFileCount(simulatedCount);
+      setFileCount(count);
 
       localStorage.setItem('dg_drive_last_sync', time);
-      localStorage.setItem('dg_drive_file_count', simulatedCount.toString());
+      localStorage.setItem('dg_drive_file_count', count.toString());
 
-      toast(`Đồng bộ hoàn tất! Tìm thấy ${simulatedCount} tài liệu văn bản mới từ Google Drive. ✨`, 'success');
-    } catch (err) {
-      // Simulate successful sync when drive API lacks active credentials
-      setTimeout(() => {
-        const time = new Date().toLocaleTimeString('vi-VN') + ' ' + new Date().toLocaleDateString('vi-VN');
-        setLastSyncTime(time);
-        const simulatedCount = Math.floor(Math.random() * 4) + 3;
-        setFileCount(simulatedCount);
-        localStorage.setItem('dg_drive_last_sync', time);
-        localStorage.setItem('dg_drive_file_count', simulatedCount.toString());
-
-        toast(`[Demo] Đồng bộ hoàn tất! Đã trích xuất ${simulatedCount} tài liệu mới từ thư mục đã chọn. ✨`, 'success');
-        setIsSyncing(false);
-      }, 2000);
+      toast(`Đồng bộ hoàn tất! Tìm thấy ${count} tài liệu văn bản từ Google Drive. ✨`, 'success');
+    } catch (err: any) {
+      console.error(err);
+      toast(err.message || 'Đồng bộ Google Drive thất bại.', 'error');
     } finally {
-      // actual API success
-      if (isSyncing) setIsSyncing(false);
+      setIsSyncing(false);
     }
   };
 
