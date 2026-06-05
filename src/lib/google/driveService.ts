@@ -22,7 +22,7 @@ import { generateId } from '@/lib/utils/helpers';
  * ⚠️ Replace with your Google Cloud OAuth 2.0 Client ID.
  * Get one at: https://console.cloud.google.com/apis/credentials
  */
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '879795270922-tiqesouhapnnf1479dqideg4605rfcg0.apps.googleusercontent.com';
 
 const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
 const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
